@@ -1,0 +1,15 @@
+import Adafruit_DHT
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17,GPIO.OUT,initial=GPIO.LOW)
+sensor = Adafruit_DHT.DHT11
+pin = 4
+while True:
+ temp,hum = Adafruit_DHT.read_retry(sensor,pin)
+ if(temp>35):
+   GPIO.output(17,GPIO.HIGH)
+   print("humidity:",hum)
+   print("Temperature:",temp)
+ else:
+   GPIO.output(17,GPIO.LOW)
+   print("ERROR")

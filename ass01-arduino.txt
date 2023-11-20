@@ -1,0 +1,24 @@
+int irsensor = 9; // connect ir sensor module to arduino pin 09
+int led = 13; // pin 13 connect led
+void setup()
+{
+	Serial.begin(9600); 
+	Serial.println("Serial Working");
+	pinMode(irsensor,INPUT);
+	pinMode(led,OUTPUT);
+}
+
+void loop()
+{
+	int sensorStatus = digitalRead(irsensor);
+	if(sensorStatus==HIGH)
+	{
+		digitalWrite(led,HIGH);
+		Serial.println("object detected");
+	}
+	else
+	{
+		digitalWrite(led,LOW);
+		Serial.println("object not detected");
+	}
+}
