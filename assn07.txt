@@ -1,0 +1,217 @@
+import java.util.Scanner;
+
+public class Full {
+    public static final int EMPTY_SLOT = 99;
+
+    public static void main(String[] args) {
+        try {
+            Operation op = new Operation();
+            System.out.print("Enter the number of pages in the page stream: ");
+            Scanner sc = new Scanner(System.in);
+            int no = sc.nextInt();
+
+            if (no <= 0) {
+                System.out.println("Number of pages should be greater than 0.");
+                return;
+            }
+
+            System.out.print("Enter page stream: ");
+            int[] stream = new int[no];
+            for (int i = 0; i < no; i++) {
+                stream[i] = sc.nextInt();
+            }
+
+            while (true) {
+                System.out.println("****Menu****");
+                System.out.println("1. LRU");
+                System.out.println("2. Optimal");
+                System.out.println("3. Fifo");
+                System.out.println("4. Lifo");
+                System.out.println("5. Exit");
+                System.out.print("Enter your choice: ");
+                int ch = sc.nextInt();
+
+                switch (ch) {
+                    case 1:
+                        op.lru(no, stream);
+                        break;
+                    case 2:
+                        op.optimal(no, stream);
+                        break;
+                    case 3:
+                        op.fifo(no, stream);
+                        break;
+                    case 4:
+                        op.lifo(no, stream);
+                        break;
+                    case 5:
+                        sc.close(); // Close the Scanner before exiting
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please enter a valid option.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class Operation {
+    int i, j;
+    private Scanner sc = new Scanner(System.in);
+
+    int found(int no, int fs, int[] frame, int page) {
+        for (i = 0; i < fs; i++)
+            if (frame[i] == page)
+                return 1;
+        return 0;
+    }
+
+    public int empty(int[] frame, int fs) {
+        for (i = 0; i < fs; i++)
+            if (frame[i] == Full.EMPTY_SLOT)
+                return i;
+        return -1;
+    }
+
+    public int max(int[] lrud, int fs) {
+        j = 0;
+        for (i = 1; i < fs; i++)
+            if (lrud[i] > lrud[j])
+                j = i;
+        return j;
+    }
+    
+        public void lifo(int no, int[] stream) {
+        System.out.print("Enter frame size: ");
+        int fs = sc.nextInt();
+        int[] frame = new int[fs];
+        int pf = 0;
+
+        for (int i = 0; i < fs; i++) {
+            frame[i] = Full.EMPTY_SLOT;
+        }
+
+        int victim = fs - 1; // Start from the last index
+        for (int i = 0; i < no; i++) {
+            int j;
+            for (j = 0; j < fs; j++) {
+                if (frame[j] == stream[i])
+                    break;
+            }
+
+            if (j == fs) {
+                frame[victim] = stream[i];
+                victim = (victim - 1 + fs) % fs;
+                pf++;
+            }
+        }
+
+        System.out.println("Total page faults by LIFO: " + pf);
+    }
+
+public void fifo(int no, int[] stream) {
+  System.out.print("Enter frame size: ");
+  int fs = sc.nextInt();
+  
+  int[] frame = new int[fs];
+  int pf = 0;
+
+  for(int i=0; i<fs; i++) {
+    frame[i] = -1; 
+  }
+
+  int victim = 0;
+  for(int i=0; i<no; i++) {
+    int j;
+    for(j=0; j<fs; j++) {
+      if(frame[j] == stream[i])
+        break;
+    }
+    
+    if(j == fs) {
+      frame[victim] = stream[i];
+      victim = (victim + 1) % fs;
+      pf++;
+    }
+  }
+
+  System.out.println("Total page faults by FIFO: " + pf);
+}
+
+    public void lru(int no, int[] stream) {
+        System.out.print("Enter frame size: ");
+        int fs = sc.nextInt();
+        int[] frame = new int[fs];
+        int[] lrud = new int[fs];
+
+        for (int i = 0; i < fs; i++) {
+            frame[i] = Full.EMPTY_SLOT;
+            lrud[i] = 0;
+        }
+
+        int pf = 0, Hit = 0;
+
+        //System.out.println("Page\tFrame Contents");
+        //for (int j = 0; j < fs; j++)
+            System.out.print("\t" + frame[j]);
+
+        for (int i = 0; i < no; i++) {
+            if (found(no, fs, frame, stream[i]) == 0) {
+                int loc = empty(frame, fs);
+                if (loc != -1) {
+                    for (int j = 0; j < fs; j++)
+                        lrud[j]++;
+                    frame[loc] = stream[i];
+                    lrud[loc] = 0;
+                } else {
+                    loc = max(lrud, fs);
+                    frame[loc] = stream[i];
+                    for (int j = 0; j < fs; j++)
+                        lrud[j]++;
+                    lrud[loc] = 0;
+                }
+            } else {
+                Hit++;
+                for (int j = 0; j < fs; j++) {
+                    if (frame[j] != stream[i])
+                        lrud[j]++;
+                    else
+                        lrud[j] = 0;
+                }
+            }
+            System.out.print("\n" + stream[i] + "\t");
+            // for (int j = 0; j < fs; j++)
+                //System.out.print(" " + frame[j]);
+        }
+
+        pf = no - Hit;
+        System.out.println("\nTotal number of page faults by LRU Technique: " + pf);
+    }
+
+    public void optimal(int no, int[] stream) {
+        try {
+            System.out.print("Enter frame size: ");
+            int fs = sc.nextInt();
+            int[] frame = new int[fs];
+            int pf = 0;
+
+            for (int i = 0; i < no; i++) {
+                int j;
+                for (j = 0; j < fs; j++) {
+                    if (frame[j] == stream[i])
+                        break;
+                }
+                if (j == fs) {
+                    pf++;
+                    frame[pf % fs] = stream[i];
+                }
+            }
+
+            System.out.println("Total number of page faults by Optimal Technique: " + pf);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
